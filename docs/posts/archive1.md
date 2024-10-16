@@ -1,8 +1,9 @@
 ---
 date: 1998-01-01
-category:
+category: '1234'
+categories:
   - History
-tag:
+tags:
   - WWI
 archive: true
 ---

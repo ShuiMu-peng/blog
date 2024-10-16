@@ -7,29 +7,50 @@ export default defineUserConfig({
     base: '/blog/',
     bundler: viteBundler(),
     lang: 'zh-CN',
-    title: '你好， VuePress ！',
-    description: '这是我的第一个 VuePress 站点',
+    title: '水木',
+    description: '欢迎来到我的空间。',
     theme: defaultTheme({
-        logo: 'https://vuejs.press/images/hero.png',
+        logo: '/logo.jpg',
         navbar: [
             '/',
             {
-                text: 'Article',
+                text: '文章',
                 link: '/article/',
             },
+            // 暂时注释掉，先主主要功能
+            // {
+            //     text: 'Tag',
+            //     link: '/tag/',
+            // },
+            // {
+            //     text: 'Category',
+            //     link: '/category/',
+            // },
             {
-                text: 'Category',
-                link: '/category/',
-            },
-            {
-                text: 'Tag',
-                link: '/tag/',
-            },
-            {
-                text: 'Timeline',
+                text: '时间线',
                 link: '/timeline/',
             },
         ],
+        sidebar: {
+            '/category': [
+                {
+                    text: 'Foo',
+                    prefix: '/foo/',
+                    link: '/foo/',
+                    children: [
+                        // SidebarItem
+                        {
+                            text: 'github',
+                            link: 'https://github.com',
+                            children: [],
+                        },
+                        // 字符串 - 页面文件路径
+                        'bar.md', // 解析为 `/foo/bar.md`
+                        '/ray.md', // 解析为 `/ray.md`
+                    ],
+                },
+            ]
+        },
     }),
 
     plugins: [
@@ -39,19 +60,21 @@ export default defineUserConfig({
                 filePathRelative ? filePathRelative.startsWith('posts/') : false,
 
             // Getting article info
-            getInfo: ({frontmatter, title, data}) => ({
-                title,
-                author: frontmatter.author || '',
-                date: frontmatter.date || null,
-                category: frontmatter.category || [],
-                tag: frontmatter.tag || [],
-                excerpt:
-                // Support manually set excerpt through frontmatter
-                    typeof frontmatter.excerpt === 'string'
-                        ? frontmatter.excerpt
-                        : data?.excerpt || '',
-            }),
-
+            getInfo: ({frontmatter, title, data}) => {
+                // 获取页面信息
+                const info: Record<string, unknown> = {
+                    title: title || '',
+                    author: frontmatter.author || '',
+                    categories: frontmatter.categories || [],
+                    category: frontmatter.categories || [],
+                    date: frontmatter.date || git.createdTime || null,
+                    tags: frontmatter.tags || [],
+                    excerpt: data.excerpt || '',
+                }
+                console.info('info:', info)
+                return info
+            }
+            ,
             // Generate excerpt for all pages excerpt those users choose to disable
             excerptFilter: ({frontmatter}) =>
                 !frontmatter.home &&
@@ -75,17 +98,16 @@ export default defineUserConfig({
                 },
                 {
                     key: 'tag',
-                    getter: (page) => page.frontmatter.tag || [],
+                    getter: ({frontmatter}) => {
+                        console.log(frontmatter.tags)
+                        return frontmatter.tags || []
+                    },
+                    path: '/tag/',
                     layout: 'Tag',
-                    itemLayout: 'Tag',
-                    frontmatter: () => ({
-                        title: 'Tags',
-                        sidebar: false,
-                    }),
-                    itemFrontmatter: (name) => ({
-                        title: `Tag ${name}`,
-                        sidebar: false,
-                    }),
+                    frontmatter: () => ({title: '标签页'}),
+                    itemPath: '/tag/:name/',
+                    itemLayout: 'TagList',
+                    itemFrontmatter: (name) => ({title: `${name}标签`}),
                 },
             ],
 

@@ -1,8 +1,8 @@
 ---
 date: 1998-01-02
-category:
+categories: 
   - History
-tag:
+tags:
   - WWII
 archive: true
 ---
