@@ -7,50 +7,30 @@ export default defineUserConfig({
     base: '/blog/',
     bundler: viteBundler(),
     lang: 'zh-CN',
-    title: '水木',
-    description: '欢迎来到我的空间。',
+    // title: '水木',
+    // description: '欢迎来到我的空间。',
     theme: defaultTheme({
         logo: '/logo.jpg',
+        home: 'Home',
         navbar: [
             '/',
             {
                 text: '文章',
                 link: '/article/',
             },
-            // 暂时注释掉，先主主要功能
-            // {
-            //     text: 'Tag',
-            //     link: '/tag/',
-            // },
-            // {
-            //     text: 'Category',
-            //     link: '/category/',
-            // },
+            {
+                text: '标签',
+                link: '/tag/',
+            },
+            {
+                text: '分类',
+                link: '/category/',
+            },
             {
                 text: '时间线',
                 link: '/timeline/',
             },
-        ],
-        sidebar: {
-            '/category': [
-                {
-                    text: 'Foo',
-                    prefix: '/foo/',
-                    link: '/foo/',
-                    children: [
-                        // SidebarItem
-                        {
-                            text: 'github',
-                            link: 'https://github.com',
-                            children: [],
-                        },
-                        // 字符串 - 页面文件路径
-                        'bar.md', // 解析为 `/foo/bar.md`
-                        '/ray.md', // 解析为 `/ray.md`
-                    ],
-                },
-            ]
-        },
+        ]
     }),
 
     plugins: [
@@ -80,11 +60,10 @@ export default defineUserConfig({
                 !frontmatter.home &&
                 frontmatter.excerpt !== false &&
                 typeof frontmatter.excerpt !== 'string',
-
             category: [
                 {
                     key: 'category',
-                    getter: (page) => page.frontmatter.category || [],
+                    getter: (page) => page.frontmatter.categories || [],
                     layout: 'Category',
                     itemLayout: 'Category',
                     frontmatter: () => ({
@@ -104,32 +83,24 @@ export default defineUserConfig({
                     },
                     path: '/tag/',
                     layout: 'Tag',
-                    frontmatter: () => ({title: '标签页'}),
+                    frontmatter: () => ({title: '标签页', sidebar: false}),
                     itemPath: '/tag/:name/',
                     itemLayout: 'TagList',
-                    itemFrontmatter: (name) => ({title: `${name}标签`}),
+                    itemFrontmatter: (name) => ({title: `${name}标签`, sidebar: false}),
                 },
             ],
 
             type: [
                 {
                     key: 'article',
-                    // Remove archive articles
-                    filter: (page) => !page.frontmatter.archive,
+                    // filter: (page) => !page.frontmatter.archive,
                     layout: 'Article',
                     frontmatter: () => ({
-                        title: 'Articles',
-                        sidebar: false,
+                        title: '文章',
+                        sidebar: false
                     }),
                     // Sort pages with time and sticky
                     sorter: (pageA, pageB) => {
-                        if (pageA.frontmatter.sticky && pageB.frontmatter.sticky)
-                            return pageB.frontmatter.sticky - pageA.frontmatter.sticky
-
-                        if (pageA.frontmatter.sticky && !pageB.frontmatter.sticky) return -1
-
-                        if (!pageA.frontmatter.sticky && pageB.frontmatter.sticky) return 1
-
                         if (!pageB.frontmatter.date) return 1
                         if (!pageA.frontmatter.date) return -1
 
