@@ -2,13 +2,14 @@
 title: '分布式调度框架调研'
 date: 2022-09-02
 author: "shuiMu"
-categories: 
+categories:
   - 技术
 tags:
   - quartz
   - dolphinScheduler
   - xxl-job
 ---
+
 ## quartz
 
 > 参考资料：[Quartz原理解密 - Dorae - 博客园](https://www.cnblogs.com/Dorae/p/9357180.html)
@@ -19,7 +20,7 @@ tags:
 >
 > 通过 `mysql for update` 锁，保证任务不重复调用
 
-<img title="" src="https://img-blog.csdn.net/20150519231230428" alt="" data-align="inline" width="608">
+![image-20150519231230428](/scheduler.assets/img.png)
 
 ### 调度原理
 
@@ -30,7 +31,7 @@ tags:
 ### 调度源码
 
 > 核心调度类：`QuartzSchedulerThread`
-> 
+>
 > 主要代码如下：
 
 ```java
@@ -38,14 +39,24 @@ tags:
 int availThreadCount = qsRsrcs.getThreadPool().blockForAvailableThreads();
 
 // 获取待执行任务列表
-triggers = qsRsrcs.getJobStore().acquireNextTriggers(
-                                now + idleWaitTime, Math.min(availThreadCount, qsRsrcs.getMaxBatchSize()), qsRsrcs.getBatchTimeWindow());
+triggers =qsRsrcs.
+
+getJobStore().
+
+acquireNextTriggers(
+        now +idleWaitTime, Math.min(availThreadCount, qsRsrcs.getMaxBatchSize()),qsRsrcs.
+
+getBatchTimeWindow());
 
 // 加锁，并循环处理待执行任务,更新任务的下次执行时间
 List<TriggerFiredResult> res = qsRsrcs.getJobStore().triggersFired(triggers);
 
 // 异步执行任务
-qsRsrcs.getThreadPool().runInThread(shell)
+qsRsrcs.
+
+getThreadPool().
+
+runInThread(shell)
 ```
 
 ## elastic-job
@@ -55,21 +66,31 @@ qsRsrcs.getThreadPool().runInThread(shell)
 ### 架构图
 
 > - 节点功能：
->   - 注册到zk（通过zk协调任务分配）
->   - 任务定时调度（通过quartz）
+    >
+
+- 注册到zk（通过zk协调任务分配）
+
+> - 任务定时调度（通过quartz）
 >   - leader选举（curator框架提供的LeaderLatch，一种抢占的方式来决定选主。各个节点通过在zk上指定目录下建立临时顺序节点，然后对列表进行排序，排在第一个就是leader）
->     - leader 进行任务分片
->   - 任务分片执行
->     - 比如 A 任务需要处理100 条数据，为了快速执行，将任务切分为 3 片并行执行
->       - 分片1 处理 id % 3 ==0 的数据
+      >
+
+- leader 进行任务分片
+
+> - 任务分片执行
+    >
+
+- 比如 A 任务需要处理100 条数据，为了快速执行，将任务切分为 3 片并行执行
+  >
+- 分片1 处理 id % 3 ==0 的数据
+
 >       - 分片2 处理 id % 3 ==1 的数据
 >       - 分片3 处理 id % 3 ==2 的数据
 >   - 日志输出
 > - console 控制台项目，获取任务执行信息
 
-<img title="" src="https://shardingsphere.apache.org/elasticjob/current/img/architecture/elasticjob_lite.png" alt="" data-align="inline" width="697">
+![image-20220215223336024](https://shardingsphere.apache.org/elasticjob/current/img/architecture/elasticjob_lite.png)
 
-<img src="/scheduler.assets/image-20220215223336024.png" alt="image-20220215223336024" style="zoom:50%;" />
+![image-20220217085340221](/scheduler.assets/image-20220215223336024.png)
 
 ### 调度原理
 
@@ -80,10 +101,11 @@ qsRsrcs.getThreadPool().runInThread(shell)
 #### pom.xml
 
 ```xml
+
 <dependency>
-  <groupId>org.apache.shardingsphere.elasticjob</groupId>
-  <artifactId>elasticjob-lite-spring-boot-starter</artifactId>
-  <version>${project.version}</version>
+    <groupId>org.apache.shardingsphere.elasticjob</groupId>
+    <artifactId>elasticjob-lite-spring-boot-starter</artifactId>
+    <version>${project.version}</version>
 </dependency>
 ```
 
@@ -97,14 +119,14 @@ server:
   port: ${port:8080}
 elasticjob:
   regCenter:
-	  # zk地址
-    serverLists: localhost:2181 
+    # zk地址
+    serverLists: localhost:2181
     #空间，相互独立隔离
-    namespace: elasticjob-lite-springboot 
+    namespace: elasticjob-lite-springboot
   jobs:
-  	# job名称
-    simpleJob: 
-    	# 执行类
+    # job名称
+    simpleJob:
+      # 执行类
       elasticJobClass: org.apache.shardingsphere.elasticjob.lite.example.job.SpringBootSimpleJob
       # 定时表达式
       cron: 1/5 * * * * ?
@@ -117,22 +139,23 @@ elasticjob:
 #### java代码
 
 ```java
+
 @Component
 public class SpringBootSimpleJob implements SimpleJob {
-    
+
     private final Logger logger = LoggerFactory.getLogger(SpringBootSimpleJob.class);
-    
+
     @Autowired
     private FooRepository fooRepository;
-    
+
     @Override
     public void execute(final ShardingContext shardingContext) {
         logger.info("Item: {} | Time: {} | Thread: {} | {}",
                 // 当前分片值
                 shardingContext.getShardingItem()
-               , new SimpleDateFormat("HH:mm:ss").format(new Date())
-               , Thread.currentThread().getId(), "SIMPLE");
-      	// 根据自己的业务需要，根据分片参数，做相应的数据处理
+                , new SimpleDateFormat("HH:mm:ss").format(new Date())
+                , Thread.currentThread().getId(), "SIMPLE");
+        // 根据自己的业务需要，根据分片参数，做相应的数据处理
         List<Foo> data = fooRepository.findTodoData(shardingContext.getShardingParameter(), 10);
         for (Foo each : data) {
             fooRepository.setCompleted(each.getId());
@@ -141,32 +164,31 @@ public class SpringBootSimpleJob implements SimpleJob {
 }
 ```
 
-
-
 ### 调度源码
 
 > 因为底层基于`quartz`，所以任务触发核心依旧是：`QuartzSchedulerThread`
-> 
+>
 > 对接底层`quartz`的job执行类为：`LiteJob.class`
-> 
+>
 > 涉及类过多，此处仅展示调用关键流程，细节可查看具体源码
 
-<img src="file:///Users/lipeng/Library/Application%20Support/marktext/images/2022-01-05-22-03-21-image.png" title="" alt="" width="742">
+<img src="/scheduler.assets/2022-01-05-22-03-21-image.png" title="" alt="" width="742">
 
 ## xxl-job
 
-> 参考资料：[分布式任务调度平台XXL-JOB](https://www.xuxueli.com/xxl-job/#%E3%80%8A%E5%88%86%E5%B8%83%E5%BC%8F%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6%E5%B9%B3%E5%8F%B0XXL-JOB%E3%80%8B)
+>
+参考资料：[分布式任务调度平台XXL-JOB](https://www.xuxueli.com/xxl-job/#%E3%80%8A%E5%88%86%E5%B8%83%E5%BC%8F%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6%E5%B9%B3%E5%8F%B0XXL-JOB%E3%80%8B)
 
 ### 架构图
 
 > - 调度器、执行器 分离，去中心化，可动态伸缩
 > - 数据中心：表示系统中会涵盖的所有数据信息
 
-<img title="在这里输入图片标题" src="https://www.xuxueli.com/doc/static/xxl-job/images/img_Qohm.png" alt="输入图片说明" width="732">
+![image-img_Qohm.png](https://www.xuxueli.com/doc/static/xxl-job/images/img_Qohm.png)
 
 ### 调度原理
 
-<img title="" src="file:///Users/lipeng/Library/Application%20Support/marktext/images/2022-01-05-22-07-36-image.png" alt="" width="835">
+![image-20220217085340221](/scheduler.assets/2022-01-05-22-07-36-image.png)
 
 ### 集成方式
 
@@ -181,9 +203,9 @@ public class SpringBootSimpleJob implements SimpleJob {
 ```xml
 <!-- xxl-job-core -->
 <dependency>
-  <groupId>com.xuxueli</groupId>
-  <artifactId>xxl-job-core</artifactId>
-  <version>${project.parent.version}</version>
+    <groupId>com.xuxueli</groupId>
+    <artifactId>xxl-job-core</artifactId>
+    <version>${project.parent.version}</version>
 </dependency>
 ```
 
@@ -207,7 +229,7 @@ xxl.job.executor.logretentiondays=30
 ```java
 /**
  * xxl job 配置
-*/
+ */
 @Configuration
 public class XxlJobConfig {
     private final Logger logger = LoggerFactory.getLogger(XxlJobConfig.class);
@@ -283,29 +305,36 @@ public class SampleXxlJob {
 ### Admin 调度源码
 
 > 核心调度类：`JobScheduleHelper`
-> 
+>
 > 主要代码如下：
 
 ```java
 // 获取数据库🔐
-preparedStatement = conn.prepareStatement(  "select * from xxl_job_lock where lock_name = 'schedule_lock' for update" );
+preparedStatement =conn.
+
+prepareStatement(  "select * from xxl_job_lock where lock_name = 'schedule_lock' for update");
 
 // 查询下次执行事件 <= 未来5s的时间
 List<XxlJobInfo> scheduleList = XxlJobAdminConfig.getAdminConfig().getXxlJobInfoDao().scheduleJobQuery(nowTime + PRE_READ_MS, preReadCount);
 
 // 触发任务执行
-JobTriggerPoolHelper.trigger(jobInfo.getId(), TriggerTypeEnum.CRON, -1, null, null, null);
+JobTriggerPoolHelper.
+
+trigger(jobInfo.getId(),TriggerTypeEnum.CRON,-1,null,null,null);
 
 // 更新下次执行时间
 refreshNextValidTime(jobInfo, new Date());
 
 // 提交事务，释放🔐
-conn.commit();
+        conn.
+
+commit();
 ```
 
 ## DolphinScheduler
 
-> 参考资料：[调度框架dolphinscheduler](https://dolphinscheduler.apache.org/zh-cn/docs/latest/user_doc/About_DolphinScheduler/About_DolphinScheduler.html)
+>
+参考资料：[调度框架dolphinscheduler](https://dolphinscheduler.apache.org/zh-cn/docs/latest/user_doc/About_DolphinScheduler/About_DolphinScheduler.html)
 >
 > 更贴合大数据的分布式调度框架
 
@@ -313,7 +342,8 @@ conn.commit();
 
 #### 关于DolphinScheduler
 
-> Apache 顶级开源项目，DolphinScheduler是一个分布式易扩展的可视化DAG工作流任务调度开源系统。解决数据研发ETL 错综复杂的依赖关系，不能直观监控任务健康状态等问题。DolphinScheduler以DAG流式的方式将Task组装起来，可实时监控任务的运行状态，同时支持重试、从指定节点恢复失败、暂停及Kill任务等操作
+> Apache 顶级开源项目，DolphinScheduler是一个分布式易扩展的可视化DAG工作流任务调度开源系统。解决数据研发ETL
+> 错综复杂的依赖关系，不能直观监控任务健康状态等问题。DolphinScheduler以DAG流式的方式将Task组装起来，可实时监控任务的运行状态，同时支持重试、从指定节点恢复失败、暂停及Kill任务等操作
 >
 > **DAG：** 有向无环图。工作流中的Task任务以有向无环图的形式组装起来，从入度为零的节点进行拓扑遍历，直到无后继节点为止。举例如下图：
 >
@@ -331,7 +361,8 @@ conn.commit();
 
 ##### 丰富的使用场景
 
-> 支持暂停恢复操作.支持多租户，更好的应对大数据的使用场景. 支持更多的任务类型，如 spark,flink, hive, mr, python, sub_process, shell
+> 支持暂停恢复操作.支持多租户，更好的应对大数据的使用场景. 支持更多的任务类型，如 spark,flink, hive, mr, python,
+> sub_process, shell
 
 ##### 高扩展性
 
@@ -350,16 +381,18 @@ conn.commit();
 - **流程定义**：通过拖拽任务节点并建立任务节点的关联所形成的可视化**DAG**
 - **流程实例**：流程实例是流程定义的实例化，可以通过手动启动或定时调度生成,流程定义每运行一次，产生一个流程实例
 - **任务实例**：任务实例是流程定义中任务节点的实例化，标识着具体的任务执行状态
-- **任务类型**：目前支持有SHELL、SQL、SUB_PROCESS(子流程)、PROCEDURE、MR、SPARK、PYTHON、DEPENDENT(依赖)、，同时计划支持动态插件扩展，注意：其中子 **SUB_PROCESS** 也是一个单独的流程定义，是可以单独启动执行的
-- **调度方式**：系统支持基于cron表达式的定时调度和手动调度。命令类型支持：启动工作流、从当前节点开始执行、恢复被容错的工作流、恢复暂停流程、从失败节点开始执行、补数、定时、重跑、暂停、停止、恢复等待线程。 其中 **恢复被容错的工作流** 和 **恢复等待线程** 两种命令类型是由调度内部控制使用，外部无法调用
+- **任务类型**：目前支持有SHELL、SQL、SUB_PROCESS(子流程)、PROCEDURE、MR、SPARK、PYTHON、DEPENDENT(依赖)、，同时计划支持动态插件扩展，注意：其中子
+  **SUB_PROCESS** 也是一个单独的流程定义，是可以单独启动执行的
+- **调度方式**：系统支持基于cron表达式的定时调度和手动调度。命令类型支持：启动工作流、从当前节点开始执行、恢复被容错的工作流、恢复暂停流程、从失败节点开始执行、补数、定时、重跑、暂停、停止、恢复等待线程。
+  其中 **恢复被容错的工作流** 和 **恢复等待线程** 两种命令类型是由调度内部控制使用，外部无法调用
 - **定时调度**：系统采用 **quartz** 分布式调度器，并同时支持cron表达式可视化的生成
-- **依赖**：系统不单单支持 **DAG** 简单的前驱和后继节点之间的依赖，同时还提供**任务依赖**节点，支持**流程间的自定义任务依赖**
+- **依赖**：系统不单单支持 **DAG** 简单的前驱和后继节点之间的依赖，同时还提供**任务依赖**节点，支持**流程间的自定义任务依赖
+  **
 - **优先级** ：支持流程实例和任务实例的优先级，如果流程实例和任务实例的优先级不设置，则默认是先进先出
 - **邮件告警**：支持 **SQL任务** 查询结果邮件发送，流程实例运行结果邮件告警及容错告警通知
-- **失败策略**：对于并行运行的任务，如果有任务失败，提供两种失败策略处理方式，**继续**是指不管并行运行任务的状态，直到流程失败结束。**结束**是指一旦发现失败任务，则同时Kill掉正在运行的并行任务，流程失败结束
+- **失败策略**：对于并行运行的任务，如果有任务失败，提供两种失败策略处理方式，**继续**是指不管并行运行任务的状态，直到流程失败结束。
+  **结束**是指一旦发现失败任务，则同时Kill掉正在运行的并行任务，流程失败结束
 - **补数**：补历史数据，支持**区间并行和串行**两种补数方式
-
-
 
 > Spark 任务日志：
 >
@@ -373,15 +406,13 @@ conn.commit();
 
 ![img](https://dolphinscheduler.apache.org/img/architecture-1.3.0.jpg)
 
-
-
 #### 模块功能
 
 ![Start process activity diagram](https://dolphinscheduler.apache.org/img/master-process-2.0-zh_cn.png)
 
 ##### API
 
->参考资料：https://dolphinscheduler.apache.org/zh-cn/docs/latest/user_doc/guide/open-api.html
+> 参考资料：https://dolphinscheduler.apache.org/zh-cn/docs/latest/user_doc/guide/open-api.html
 >
 >- 负责元数据的管理
 >
@@ -399,7 +430,8 @@ conn.commit();
 >
 > - **Quartz**分布式调度组件，主要负责定时任务的启停操作，当quartz调起任务后，Master内部会有线程池具体负责处理任务的后续操作
 > - **MasterRegistryClient** 注册到zk中，并监听worker、master 注册的目录
-> - **MasterSchedulerService**是一个扫描线程，定时扫描数据库中的 **command** 表，生成工作流实例，根据不同的**命令类型**进行不同的业务操作
+> - **MasterSchedulerService**是一个扫描线程，定时扫描数据库中的 **command** 表，生成工作流实例，根据不同的**命令类型**
+    进行不同的业务操作
 > - **WorkflowExecuteThread**主要是负责DAG任务切分、任务提交、各种不同命令类型的逻辑处理，处理任务状态和工作流状态事件
 > - **EventExecuteService**处理master负责的工作流实例所有的状态变化事件，使用线程池处理工作流的状态事件
 > - **StateWheelExecuteThread**处理依赖任务和超时任务的定时状态更新
@@ -436,7 +468,7 @@ conn.commit();
 
 ##### WorkerServer
 
->- WorkerServer也采用分布式无中心设计理念，服务启动时向Zookeeper注册临时节点；
+> - WorkerServer也采用分布式无中心设计理念，服务启动时向Zookeeper注册临时节点；
 >
 >- 接收`MasterServer`调度请求，进行任务执行（所以woker所在服务，需要准备好任务执行所需的各种环境，比如spark、flink）；并响应执行结果
 >
@@ -470,7 +502,7 @@ conn.commit();
 
 ##### Alert
 
->- 告警管理，查询数据库中需要告警的数据，进行发送
+> - 告警管理，查询数据库中需要告警的数据，进行发送
 >- sql 类型任务，发送邮件也会通过此服务
 >
 >源码仅支持单机服务
@@ -479,10 +511,11 @@ conn.commit();
 
 > 日志服务，给`API`服务调用查看日志
 
-####  `quartz` 整合原理
+#### `quartz` 整合原理
 
 - `API` 服务在定时任务启动时，会将定时信息，按照`quartz`需要的格式，插入到数据库中
-- `quartz` 定时触发时，`org.apache.dolphinscheduler.service.quartz.ProcessScheduleJob`类，会将任务信息，插入到表`t_ds_command`
+- `quartz` 定时触发时，`org.apache.dolphinscheduler.service.quartz.ProcessScheduleJob`类，会将任务信息，插入到表
+  `t_ds_command`
 
 ### 运维
 
@@ -531,6 +564,7 @@ public interface AlertChannelFactory {
     String name();
 
     AlertChannel create();
+
     /**
      * Returns the configurable parameters that this plugin needs to display on the web ui
      */
@@ -583,12 +617,21 @@ public final class HttpAlertChannel implements AlertChannel {
 > **ADT如何应用？**（还没有实现）
 >
 > - HTTP调度服务：特点：需要通过 `微服务名称`方式调用（不直接使用域名）
->   - 现有方式：使用的`quartz`框架，并且注册至注册中心，所以可以通过服务名称进行调用
->   - DS方式：需要增加一个能够调用微服务接口的桥梁接口，DS携带真实请求路径访问中间接口，桥梁接口转发真实调用请求
+    >
+
+- 现有方式：使用的`quartz`框架，并且注册至注册中心，所以可以通过服务名称进行调用
+
+> - DS方式：需要增加一个能够调用微服务接口的桥梁接口，DS携带真实请求路径访问中间接口，桥梁接口转发真实调用请求
 > - **归因引擎**：特点：`有序的 3 个 flink`任务
->   - 现有方式：3个jenkins任务使用 shell 脚本 去调用flink任务，java代码 发起 jenkins，并轮询获取jenkins执行状态，第一个成功后，发起第二个任务调用，依次调用完成
->   - DS方式：
->     - 定义flink任务执行的 dag图，flink 任务执行结束后，增加 Http任务节点（可以检验返回值，保证稳定调用成功），或者连接数据库直接更新数据的状态
+    >
+
+- 现有方式：3个jenkins任务使用 shell 脚本 去调用flink任务，java代码 发起 jenkins，并轮询获取jenkins执行状态，第一个成功后，发起第二个任务调用，依次调用完成
+
+> - DS方式：
+    >
+
+- 定义flink任务执行的 dag图，flink 任务执行结束后，增加 Http任务节点（可以检验返回值，保证稳定调用成功），或者连接数据库直接更新数据的状态
+
 >     - java代码 调用 DS的接口，发起任务调用
 
 ### FAQ
@@ -603,26 +646,26 @@ https://dolphinscheduler.apache.org/zh-cn/docs/release/faq.html
 
 ## 对比
 
-|                    | xxl-job                                                   | elastic-job                                                  | quzrtz | dolphinscheduler                                             |
-| ------------------ | --------------------------------------------------------- | ------------------------------------------------------------ | ------ | ------------------------------------------------------------ |
-| 集群依赖           | mysql                                                     | zookeeper                                                    | mysql  | mysql、zookeeper                                             |
-| 动态扩容           | 支持                                                      | 支持                                                         | 支持   | master、worker支持                                           |
-| 任务分片，并行处理 | 支持                                                      | 支持                                                         |        | 不支持                                                       |
-| 管理界面           | 非常完善                                                  | 完善，需要单独部署项目， 但是如果需要新增加定时任务，需要二次开发 |        | 非常完善                                                     |
-| 日志追溯           | 支持                                                      | 支持                                                         |        | 支持                                                         |
-| 任务失败处理策略   | 内置邮件告警， 可轻易扩展其他告警方式，如：钉钉、企业微信 | 内置：邮件、企业微信、钉钉                                   |        | 内置：邮件、企业微信、钉钉、飞书、http......<br />且支持扩展 |
-| 集成困难度         | 简单                                                      | 简单                                                         | 简单   | 略复杂                                                       |
-| 支持DAG            | 不支持，未来计划支持                                      | 不支持，未来计划支持                                         |        | 支持                                                         |
+|           | xxl-job                       | elastic-job                       | quzrtz | dolphinscheduler                       |
+|-----------|-------------------------------|-----------------------------------|--------|----------------------------------------|
+| 集群依赖      | mysql                         | zookeeper                         | mysql  | mysql、zookeeper                        |
+| 动态扩容      | 支持                            | 支持                                | 支持     | master、worker支持                        |
+| 任务分片，并行处理 | 支持                            | 支持                                |        | 不支持                                    |
+| 管理界面      | 非常完善                          | 完善，需要单独部署项目， 但是如果需要新增加定时任务，需要二次开发 |        | 非常完善                                   |
+| 日志追溯      | 支持                            | 支持                                |        | 支持                                     |
+| 任务失败处理策略  | 内置邮件告警， 可轻易扩展其他告警方式，如：钉钉、企业微信 | 内置：邮件、企业微信、钉钉                     |        | 内置：邮件、企业微信、钉钉、飞书、http......<br />且支持扩展 |
+| 集成困难度     | 简单                            | 简单                                | 简单     | 略复杂                                    |
+| 支持DAG     | 不支持，未来计划支持                    | 不支持，未来计划支持                        |        | 支持                                     |
 
 ## 选择
 
 一定要按照实际需求
 
 - 基础业务调用，不需要`dag`；且对大数据任务需求较少
-  - 建议选择 `xxl-job`
-  - 因为：基础功能强大，简单易用，环境依赖，架构简单，易维护
+    - 建议选择 `xxl-job`
+    - 因为：基础功能强大，简单易用，环境依赖，架构简单，易维护
 - else：
-  - 选择`Dolphinscheduler`
+    - 选择`Dolphinscheduler`
 
 
 
