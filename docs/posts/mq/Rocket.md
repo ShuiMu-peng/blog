@@ -1,3 +1,13 @@
+---
+title: 'RocketMQ'
+date: 2022-03-13
+author: "shuiMu"
+categories:
+  - 技术
+tags:
+  - mq
+  - rocketmq
+---
 ## RocketMQ
 
 官网：

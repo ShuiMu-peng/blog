@@ -1226,7 +1226,7 @@ PUT /db_index_2/_alias/db_index
 >
 > 4. 主分片、副本分片都保存成功后，响应客户端
 
-![image-20220120083350759](ES.assets/image-20220120083350759.png)
+![image-20220120083350759](/ES.assets/image-20220120083350759.png)
 
 查询原理
 
@@ -1235,7 +1235,7 @@ PUT /db_index_2/_alias/db_index
 > 3. 协调节点将结果汇总，并进行全局的排序
 > 4. 协调节点 根据 汇总信息，对各个数据节点发送 get 请求，获取数据，再响应给`client`
 
-![image-20220120083647907](ES.assets/image-20220120083647907.png)
+![image-20220120083647907](/ES.assets/image-20220120083647907.png)
 
 节点中写入数据
 
@@ -1255,7 +1255,7 @@ PUT /db_index_2/_alias/db_index
 >
 >     Segment太多时，ES定期会将多个segment合并成为大的segment，减少索引查询时IO开销，此阶段ES会真正的物理删除（之前执行过的delete的数据）
 
-![image-20220120084057942](ES.assets/image-20220120084057942.png)
+![image-20220120084057942](/ES.assets/image-20220120084057942.png)
 
 ## ik分词器
 

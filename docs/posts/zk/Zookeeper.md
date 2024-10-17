@@ -118,7 +118,8 @@ setquota -n|-b val path
 
 > ZooKeeper 数据模型的结构与 Unix 文件系统很类似，整体上可以看作是一棵树，每个节点称做一个 ZNode。
 
-​    ![0](https://note.youdao.com/yws/public/resource/f0549278905bb988c831d6910c54143a/xmlnote/42FE45D9612741FE9120F6054B97AA6D/45253)
+![img_1.png](/Zookeeper.assets/img.png)
+
 
 ZooKeeper的数据模型是层次模型，层次模型常见于文件系统。层次模型和key-value模型是两种主流的数据模型。ZooKeeper使用文件系统模型主要基于以下两点考虑:
 
@@ -182,7 +183,7 @@ create -t 10 /ttl
 
 **节点状态信息**
 
-![image-20230522215952151](Zookeeper.assets/image-20230522215952151.png)
+![image-20230522215952151](/Zookeeper.assets/image-20230522215952151.png)
 
 - cZxid：节点创建的事务id
 - ctime：节点创建的时间戳

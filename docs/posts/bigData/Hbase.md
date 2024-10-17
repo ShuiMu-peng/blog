@@ -1,3 +1,12 @@
+---
+title: 'Hbase'
+date: 2022-07-13
+author: "shuiMu"
+categories:
+  - 技术
+tags:
+  - hbase
+---
 ## Hbase概述
 
 > Apache Hbase 是以HDFS存储的，一种分布式、可扩展的NoSql数据库
@@ -61,7 +70,7 @@ Hbase可以用于存储多种结构的数据，以 JSON 为例，存储的数据
 
 可以看到，每个列族下，字段可为空，稀疏存储
 
-![image-20221128213442507](./Hbase.assets/image-20221128213442507.png)
+![image-20221128213442507](/Hbase.assets/image-20221128213442507.png)
 
 #### 物理结构：
 
@@ -69,7 +78,7 @@ Hbase可以用于存储多种结构的数据，以 JSON 为例，存储的数据
 
 每个表的，每个列族存储为一个 `StoreFile`
 
-![image-20221128213727752](./Hbase.assets/image-20221128213727752.png)
+![image-20221128213727752](/Hbase.assets/image-20221128213727752.png)
 
 #### 数据模型：
 
@@ -99,7 +108,7 @@ Hbase可以用于存储多种结构的数据，以 JSON 为例，存储的数据
 
 ### 基本架构
 
-![image-20221214171119216](./Hbase.assets/image-20221214171119216.png)
+![image-20221214171119216](/Hbase.assets/image-20221214171119216.png)
 
 #### 架构角色
 
@@ -395,8 +404,8 @@ public class DemoDml {
 负载均衡：通过读取meata表，了解Region 的分配，通过ZK了解Region Server的节点状态，5分钟调控一次，分配均衡
 
 - meta表，本质上和Hbase的其他表格相同
-  ![image-20221214164053080](./Hbase.assets/image-20221214164053080.png)
-  ![image-20221214164134193](./Hbase.assets/image-20221214164134193.png)
+  ![image-20221214164053080](/Hbase.assets/image-20221214164053080.png)
+  ![image-20221214164134193](/Hbase.assets/image-20221214164134193.png)
   - RowKey：table,region start key,region id（表名，region的起始rowKey和regionID）
   - info：regioninfo 为region 信息，存储一个HRegionInfo对象
   - info：server 为当前region 所处的`RegionServer` 信息，包含端口号
@@ -409,7 +418,7 @@ public class DemoDml {
 
 > 主要进程，具体实现类为`HRegionServer`，通常部署在 `dataNode` 上
 
-![image-20221215102036139](./Hbase.assets/image-20221215102036139.png)
+![image-20221215102036139](/Hbase.assets/image-20221215102036139.png)
 
 #### MemStore
 
@@ -427,7 +436,7 @@ public class DemoDml {
 
 写入流程如下图所示：
 
-![image-20221216102421800](./Hbase.assets/image-20221216102421800.png)
+![image-20221216102421800](/Hbase.assets/image-20221216102421800.png)
 
 > 在数据写入到 `Mem Story` 后，就会跟客户端响应 `ACK`
 
@@ -460,7 +469,7 @@ public class DemoDml {
 
 #### 读流程
 
-![image-20221216102443647](./Hbase.assets/image-20221216102443647.png)<u></u>
+![image-20221216102443647](/Hbase.assets/image-20221216102443647.png)<u></u>
 
 > 不管第6步是否能够读取到数据，都会进行第7步读取，因为缓存中的数据可能不是最新的，最终会将读取到的所有数据，合并版本，按照get的要求返回即可
 
@@ -481,7 +490,7 @@ public class DemoDml {
 > - **Minor Compaction** 是指选取一些小的、相邻的StoreFile将他们合并成一个更大的StoreFile，在这个过程中不会处理已经Deleted或Expired的Cell。一次Minor Compaction的结果是更少并且更大的StoreFile
 > - **Major Compaction** 是指将所有的StoreFile合并成一个StoreFile，这个过程还会清理三类无意义数据：被删除的数据、TTL过期数据、版本号超过设定版本号的数据。MajorCompaction 时对系统的压力还是很大的，所以建议关闭自动MajorCompaction，采用手动触发的方式，定期进行 MajorCompaction
 
-![image-20221215120226253](./Hbase.assets/image-20221215120226253.png)
+![image-20221215120226253](/Hbase.assets/image-20221215120226253.png)
 
 ### Region Split
 
@@ -501,7 +510,7 @@ public class DemoDml {
 create 'score','info',SPLITS=> ['10', '20', '30', '40']
 ```
 
-![image-20221216101710212](./Hbase.assets/image-20221216101710212.png)
+![image-20221216101710212](/Hbase.assets/image-20221216101710212.png)
 
 #### 系统拆分
 
@@ -530,7 +539,7 @@ create 'score','info',SPLITS=> ['10', '20', '30', '40']
 
 > 有以下用户数据：如何设计rowKey，可以方便的实现需求的快速查询
 
-![image-20221216110931369](./Hbase.assets/image-20221216110931369.png)
+![image-20221216110931369](/Hbase.assets/image-20221216110931369.png)
 
 **需求一：统计张三在2021年12月份消费的总金额**
 
@@ -541,7 +550,7 @@ scan 'order',{STARTROW=>'zhangsan2021-12',STOPROW=>'zhangsan2021-12.'}
 
 ```
 
-![image-20221216114414110](./Hbase.assets/image-20221216114414110.png)
+![image-20221216114414110](/Hbase.assets/image-20221216114414110.png)
 
 **需求2：统计所有人在2021年12月份消费的总金额**
 
@@ -569,7 +578,7 @@ scan 'order',{STARTROW=>'2021-12',STOPROW=>'2021-12.'}
 >
 > 现有系统的处理逻辑：每个月一张表，且每张表 9个分区
 
-![image-20221216130059810](./Hbase.assets/image-20221216130059810.png)
+![image-20221216130059810](/Hbase.assets/image-20221216130059810.png)
 
 ```java
 public static String buildBorderRow(Long pid, Long time, String appKey) {

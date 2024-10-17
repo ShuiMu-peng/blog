@@ -70,11 +70,10 @@ defineProps({
 
     .title {
         position: relative;
-
         display: inline-block;
-
         font-size: 1.28rem;
         line-height: 2rem;
+        color: #3eaf7c;
 
         &::after {
             content: '';
@@ -121,7 +120,7 @@ defineProps({
     }
 
     .excerpt {
-        max-height: 333px;
+        max-height: 250px;
         overflow: hidden;
 
         h1 {

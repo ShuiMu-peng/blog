@@ -9,8 +9,6 @@ tags:
   - dolphinScheduler
   - xxl-job
 ---
-#### 分布式调度框架调研
-
 ## quartz
 
 > 参考资料：[Quartz原理解密 - Dorae - 博客园](https://www.cnblogs.com/Dorae/p/9357180.html)
@@ -27,7 +25,7 @@ tags:
 
 **大概逻辑如下：**
 
-![image-20220216191905877](scheduler.assets/image-20220216191905877.png)
+![image-20220216191905877](/scheduler.assets/image-20220216191905877.png)
 
 ### 调度源码
 
@@ -71,11 +69,11 @@ qsRsrcs.getThreadPool().runInThread(shell)
 
 <img title="" src="https://shardingsphere.apache.org/elasticjob/current/img/architecture/elasticjob_lite.png" alt="" data-align="inline" width="697">
 
-<img src="scheduler.assets/image-20220215223336024.png" alt="image-20220215223336024" style="zoom:50%;" />
+<img src="/scheduler.assets/image-20220215223336024.png" alt="image-20220215223336024" style="zoom:50%;" />
 
 ### 调度原理
 
-![image-20220217085340221](scheduler.assets/image-20220217085340221.png)
+![image-20220217085340221](/scheduler.assets/image-20220217085340221.png)
 
 ### 集成方式：
 
@@ -343,7 +341,7 @@ conn.commit();
 
 > [信息来源](https://dolphinscheduler.apache.org/zh-cn/user/index.html)
 
-![image-20220212200323617](scheduler.assets/image-20220212200323617-4667410.png)
+![image-20220212200323617](/scheduler.assets/image-20220212200323617-4667410.png)
 
 ### 功能介绍
 
@@ -365,7 +363,7 @@ conn.commit();
 
 > Spark 任务日志：
 >
-> ![image-20220211105825056](scheduler.assets/image-20220211105825056.png)
+> ![image-20220211105825056](/scheduler.assets/image-20220211105825056.png)
 
 ### 架构设计
 
@@ -599,9 +597,9 @@ https://dolphinscheduler.apache.org/zh-cn/docs/release/faq.html
 
 ### 其他资料：
 
-![image-20220210081901024](scheduler.assets/image-20220210081901024.png)
+![image-20220210081901024](/scheduler.assets/image-20220210081901024.png)
 
-![image-20220210082252183](scheduler.assets/image-20220210082252183.png)
+![image-20220210082252183](/scheduler.assets/image-20220210082252183.png)
 
 ## 对比
 

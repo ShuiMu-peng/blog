@@ -7,11 +7,11 @@ export default defineUserConfig({
     base: '/blog/',
     bundler: viteBundler(),
     lang: 'zh-CN',
-    // title: '水木',
-    // description: '欢迎来到我的空间。',
+    title: '水木',
+    description: '欢迎来到我的空间。',
     theme: defaultTheme({
         logo: '/logo.jpg',
-        home: 'Home',
+        // home: 'Home',
         navbar: [
             '/',
             {
