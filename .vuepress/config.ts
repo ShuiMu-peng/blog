@@ -3,6 +3,7 @@ import recoTheme from "vuepress-theme-reco";
 import {viteBundler} from '@vuepress/bundler-vite'
 
 export default defineUserConfig({
+    base: "/blog",
     title: "Game",
     description: "shuiMu's blog",
     bundler: viteBundler(),
