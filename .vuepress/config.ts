@@ -25,7 +25,7 @@ export default defineUserConfig({
         // docsRepo: "https://github.com/vuepress-reco/vuepress-theme-reco-next",
         // docsBranch: "main",
         // docsDir: "example",
-        lastUpdatedText: "",
+        lastUpdatedText: "更新时间",
         // series 为原 sidebar
         // series: {
         //     "/docs/theme-reco/": [
