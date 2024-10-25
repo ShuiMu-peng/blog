@@ -7,6 +7,11 @@ export default defineUserConfig({
     title: "Game",
     description: "shuiMu's blog",
     bundler: viteBundler(),
+    head: [
+        [
+            'link', {rel: 'icon', href: '/blog/avatar.png'}
+        ]
+    ],
     // bundler: webpackBundler(),
     theme: recoTheme({
         style: "@vuepress-reco/style-default",
